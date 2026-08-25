@@ -15,7 +15,11 @@ let backgroundTimer: any = null;
 // Actually, to make it jump when unpaused, we need to track missed ticks.
 let lastTickTime = Date.now();
 
-let currentState = {
+let currentState: {
+  activeMineId: string | null;
+  isPlaying: boolean;
+  seriesData: TelemetryTimeSeriesPoint[];
+} = {
   activeMineId,
   isPlaying,
   seriesData
