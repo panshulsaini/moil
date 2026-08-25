@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 7.5%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 7.5%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 263.4 70% 50.4%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 18%;
+    --input: 217.2 32.6% 18%;
+    --ring: 263.4 70% 50.4%;
+
+    --radius: 0.5rem;
+  }
+
+  body {
+    @apply bg-[#080C14] text-slate-100 antialiased selection:bg-purple-600 selection:text-white font-sans;
+    background-image: 
+      radial-gradient(ellipse 80% 80% at 50% -20%, rgba(139, 92, 246, 0.08), rgba(255, 255, 255, 0)),
+      radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.04), transparent 40%),
+      radial-gradient(circle at 20% 80%, rgba(239, 68, 68, 0.03), transparent 40%);
+    min-height: 100vh;
+  }
+}
+
+/* Custom Scrollbar for Industrial Telemetry Panels */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0F17;
+}
+::-webkit-scrollbar-thumb {
+  background: #273549;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3E4C63;
+}
+
+/* Print Styles for DGMS Shift Handover Export */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
