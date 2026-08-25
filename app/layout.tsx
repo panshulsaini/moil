@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/layout/AppShell";
+import { MoilAssistant } from "@/components/chat/MoilAssistant";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -29,6 +30,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${inter.className} min-h-screen bg-[#070B14] text-slate-100`}>
         <AppShell>{children}</AppShell>
+        <MoilAssistant />
       </body>
     </html>
   );
