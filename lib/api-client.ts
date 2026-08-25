@@ -234,6 +234,7 @@ export async function predictShortfall(
         shortfall_percentage: shortfallPercentage,
         shortfall_risk_level: mlResponse.risk_level as RiskLevel,
         confidence_score: mlResponse.confidence_score,
+        model_accuracy: mlResponse.confidence_score * 100,
         primary_failure_mode:
           mlResponse.risk_level === 'LOW'
             ? 'Normal Operations'
