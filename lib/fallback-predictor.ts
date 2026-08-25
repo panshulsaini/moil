@@ -335,7 +335,8 @@ export function calculatePredictionFallback(request: PredictRequestDTO): Predict
   const equipment: MiningEquipment[] = [];
   const weather: WeatherTelemetry = { 
     id: 'mock-w', 
-    mine_id: mine.id, 
+    mine_id: mine.id,
+    created_at: new Date().toISOString(),
     timestamp: new Date().toISOString(), 
     rainfall_mm: 15.0, 
     soil_moisture_pct: 55.0, 
