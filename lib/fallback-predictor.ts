@@ -341,8 +341,9 @@ export function calculatePredictionFallback(request: PredictRequestDTO): Predict
     soil_moisture_pct: 55.0, 
     surface_temp_c: 28.0, 
     humidity_pct: 75.0, 
-    wind_speed_kmh: 10, 
-    visibility_km: 10 
+    wind_speed_kmh: 10,
+    satellite_ndvi: 0.65,
+    flood_risk_index: 2.0
   };
   return calculateHeuristicPrediction({ mine, equipment, weather, request });
 }
