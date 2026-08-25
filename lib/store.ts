@@ -4,9 +4,9 @@ import { TelemetryTimeSeriesPoint, MOIL_MINES, generateTelemetrySeries } from ".
 type Listener = () => void;
 const listeners = new Set<Listener>();
 
-let activeMineId = MOIL_MINES[0].id;
+let activeMineId: string | null = MOIL_MINES[0].id;
 let isPlaying = false;
-let seriesData = generateTelemetrySeries(activeMineId, 24);
+let seriesData = generateTelemetrySeries(activeMineId as string, 24);
 
 let backgroundTimer: any = null;
 
@@ -88,9 +88,9 @@ setInterval(() => {
 export const store = {
   getState: () => currentState,
   subscribe: (l: Listener) => { listeners.add(l); return () => listeners.delete(l); },
-  setActiveMine: (id: string) => {
+  setActiveMine: (id: string | null) => {
     activeMineId = id;
-    seriesData = generateTelemetrySeries(id, 24);
+    if (id) seriesData = generateTelemetrySeries(id, 24);
     emit();
   },
   setPlaying: (playing: boolean) => {
@@ -129,7 +129,7 @@ export const store = {
     emit();
   },
   resetToBase: () => {
-    seriesData = generateTelemetrySeries(activeMineId, 24);
+    seriesData = generateTelemetrySeries(activeMineId as string, 24);
     emit();
   },
   injectOverride: (overrides: Partial<TelemetryTimeSeriesPoint>) => {
