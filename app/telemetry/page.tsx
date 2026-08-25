@@ -62,16 +62,25 @@ function TelemetryContent() {
     <div className="space-y-6 animate-in fade-in-50 duration-300">
       {/* Header Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#0E1528] p-5 rounded-2xl border border-slate-800/80 shadow-xl">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-3">
+            <div className="h-3 w-3 rounded-full bg-cyan-400 animate-pulse ring-2 ring-cyan-500/50" />
             <Radio className="h-5 w-5 text-cyan-400" />
             <h1 className="text-xl sm:text-2xl font-extrabold text-white">
               Satellite & In-Situ Geotechnical Telemetry Fusion
             </h1>
           </div>
-          <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
-            Multi-modal correlation of Doppler precipitation radar with slope TDR moisture, piezometric pore pressure, and pump head dynamics.
-          </p>
+          <div className="flex items-center gap-2 mt-2 ml-8">
+            <span className="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-xs font-mono text-emerald-400">
+              Source: Kaggle AI4I 2020
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-xs font-mono text-cyan-400">
+              Source: Open-Meteo API
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-xs font-mono text-amber-400">
+              Source: ISRO Bhuvan
+            </span>
+          </div>
         </div>
 
         {/* Mine Filter Buttons */}
