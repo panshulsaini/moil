@@ -24,6 +24,7 @@ export function GisMiningMap() {
     showRainRadar: true,
     showSlopeHazards: true,
     showFleetGps: true,
+    showSensors: true,
   });
 
   return (

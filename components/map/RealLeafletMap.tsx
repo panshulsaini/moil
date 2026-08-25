@@ -99,7 +99,7 @@ function MapFocusController({ activeMineId }: { activeMineId: string | null }) {
   return null;
 }
 
-export default function RealLeafletMap({ layers }: { layers: { showRainRadar: boolean, showSlopeHazards: boolean, showFleetGps: boolean } }) {
+export default function RealLeafletMap({ layers }: { layers: { showRainRadar: boolean, showSlopeHazards: boolean, showFleetGps: boolean, showSensors: boolean } }) {
   const { activeMineId, isPlaying } = useGlobalStore();
   const [fleet, setFleet] = useState(initialFleet);
 
