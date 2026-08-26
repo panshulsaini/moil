@@ -46,10 +46,10 @@ export function MoilAssistant() {
       const activeMine = MOIL_MINES.find(m => m.id === activeMineId);
       
       const context = {
-        active_mine_name: activeMine?.name,
-        active_mine_district: activeMine?.district,
+        active_mine_name: activeMine ? activeMine.name : "All MOIL Concessions (Regional)",
+        active_mine_district: activeMine ? activeMine.district : "Maharashtra & Madhya Pradesh",
         telemetry: currentTelemetry,
-        fleet_status: "8 units active, 92% uptime"
+        fleet_status: "Total 64 units active across regional assets, 88% overall uptime"
       };
 
       // We only send the last 6 messages to save context window
