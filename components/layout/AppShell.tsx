@@ -13,13 +13,14 @@ import { calculatePredictionFallback } from "@/lib/fallback-predictor";
 import { PredictResultData } from "@/lib/types";
 import { Sparkles, ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { useGlobalStore, store } from "@/lib/store";
 
 export interface AppShellProps {
   children: React.ReactNode;
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const [selectedMineId, setSelectedMineId] = React.useState<string>("ALL");
+  const { activeMineId } = useGlobalStore();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState(false);
   const [isQuickSimOpen, setIsQuickSimOpen] = React.useState(false);
 
@@ -32,7 +33,7 @@ export function AppShell({ children }: AppShellProps) {
   // Trigger fast prediction whenever quick sim opens or sliders change
   React.useEffect(() => {
     if (isQuickSimOpen) {
-      const activeMine = MOIL_MINES.find((m) => m.id === selectedMineId) || MOIL_MINES[0];
+      const activeMine = MOIL_MINES.find((m) => m.id === activeMineId) || MOIL_MINES[0];
       const result = calculatePredictionFallback({
         mine_id: activeMine.id,
         target_override_mt: activeMine.target_daily_tonnage,
@@ -44,7 +45,7 @@ export function AppShell({ children }: AppShellProps) {
       });
       setPrediction(result);
     }
-  }, [isQuickSimOpen, selectedMineId, rainfall, soilMoisture, downtime]);
+  }, [isQuickSimOpen, activeMineId, rainfall, soilMoisture, downtime]);
 
   return (
     <div className="flex min-h-screen bg-[#070B14] text-slate-100 antialiased font-sans">
@@ -69,8 +70,8 @@ export function AppShell({ children }: AppShellProps) {
       {/* Main App Container */}
       <div className="flex flex-1 flex-col min-w-0 overflow-x-hidden">
         <Header
-          selectedMineId={selectedMineId}
-          onSelectMine={setSelectedMineId}
+          selectedMineId={activeMineId || "ALL"}
+          onSelectMine={(id) => store.setActiveMine(id === "ALL" ? null : id)}
           onOpenQuickSim={() => setIsQuickSimOpen(true)}
           onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
         />
@@ -90,9 +91,9 @@ export function AppShell({ children }: AppShellProps) {
             <DialogDescription>
               Instantly simulate precipitation surges and slope moisture impacts for{" "}
               <strong className="text-slate-200">
-                {selectedMineId === "ALL"
+                {!activeMineId
                   ? "All Regional MOIL Assets"
-                  : MOIL_MINES.find((m) => m.id === selectedMineId)?.name || "Balaghat Mine"}
+                  : MOIL_MINES.find((m) => m.id === activeMineId)?.name || "Balaghat Mine"}
               </strong>
             </DialogDescription>
           </DialogHeader>
