@@ -593,57 +593,83 @@ export const MOCK_CORRECTIVE_ACTIONS: CorrectiveAction[] = [
 ];
 
 export function generateTelemetrySeries(
-  mineId: string = "00000000-0000-0000-0000-000000000001",
+  mineId: string | null = "00000000-0000-0000-0000-000000000001",
   hoursCount: number = 24
 ): TelemetryTimeSeriesPoint[] {
   const points: TelemetryTimeSeriesPoint[] = [];
-  const baseMine = MOIL_MINES.find((m) => m.id === mineId) || MOIL_MINES[0];
-  const targetHourly = baseMine.target_daily_tonnage / 24;
 
-  let cumRainfall = 0;
+  // If a specific mine is selected, generate for that mine.
+  // Otherwise, aggregate across all mines.
+  const isAll = !mineId || mineId === "ALL";
+  const minesToProcess = isAll ? MOIL_MINES : [MOIL_MINES.find((m) => m.id === mineId) || MOIL_MINES[0]];
+
+  // We need to keep track of cumulative rainfall for each mine independently
+  const cumRainfalls = minesToProcess.map(() => 0);
+
   for (let i = 0; i < hoursCount; i++) {
     const hour = (i + 1).toString().padStart(2, "0") + ":00";
     
-    // Simulate realistic diurnal and monsoon rain curve
-    const rainNoise = Math.sin((i / hoursCount) * Math.PI) * (baseMine.current_rainfall_mm_hr * 1.3);
-    const rain = Math.max(0, parseFloat((rainNoise + (Math.sin(i * 1.5) * 4)).toFixed(1)));
-    cumRainfall += rain;
+    let totalRain = 0;
+    let totalCumRain = 0;
+    let totalExtraction = 0;
+    let totalTarget = 0;
+    let avgMoisture = 0;
+    let avgFos = 0;
+    let avgPorePressure = 0;
+    let totalPumpDischarge = 0;
+    let totalSumpInflow = 0;
+    let avgGrade = 0;
 
-    // Soil moisture increases with rainfall
-    const moisture = Math.min(
-      95,
-      Math.max(
-        20,
-        parseFloat((baseMine.current_soil_moisture_pct - 15 + (cumRainfall * 0.4) + Math.sin(i * 0.8) * 3).toFixed(1))
-      )
-    );
+    minesToProcess.forEach((baseMine, idx) => {
+      const targetHourly = baseMine.target_daily_tonnage / 24;
+      
+      const rainNoise = Math.sin((i / hoursCount) * Math.PI) * (baseMine.current_rainfall_mm_hr * 1.3);
+      const rain = Math.max(0, parseFloat((rainNoise + (Math.sin(i * 1.5) * 4)).toFixed(1)));
+      cumRainfalls[idx] += rain;
+      const cumRainfall = cumRainfalls[idx];
 
-    // Factor of safety inversely proportional to moisture
-    const fos = Math.max(1.05, parseFloat((2.2 - (moisture / 100) * 1.1).toFixed(2)));
+      const moisture = Math.min(
+        95,
+        Math.max(
+          20,
+          parseFloat((baseMine.current_soil_moisture_pct - 15 + (cumRainfall * 0.4) + Math.sin(i * 0.8) * 3).toFixed(1))
+        )
+      );
 
-    // Sump inflow increases exponentially with rain
-    const sumpInflow = Math.round(1200 + rain * 65 + (moisture * 12));
-    const pumpDischarge = Math.min(baseMine.pump_capacity_gpm, Math.round(sumpInflow * 0.95 + 150));
+      const fos = Math.max(1.05, parseFloat((2.2 - (moisture / 100) * 1.1).toFixed(2)));
+      const sumpInflow = Math.round(1200 + rain * 65 + (moisture * 12));
+      const pumpDischarge = Math.min(baseMine.pump_capacity_gpm, Math.round(sumpInflow * 0.95 + 150));
+      const rainPenalty = Math.min(0.7, (rain / 50) * 0.5 + (moisture > 65 ? 0.25 : 0.05));
+      const extraction = Math.round(targetHourly * (1 - rainPenalty) * (0.9 + Math.random() * 0.2));
+      const porePressure = Math.round(15 + (moisture * 0.45) + (rain * 0.3));
+      const grade = parseFloat((42.5 + Math.sin(i) * 2.2).toFixed(1));
 
-    // Extraction drops when rain and moisture are high
-    const rainPenalty = Math.min(0.7, (rain / 50) * 0.5 + (moisture > 65 ? 0.25 : 0.05));
-    const extraction = Math.round(targetHourly * (1 - rainPenalty) * (0.9 + Math.random() * 0.2));
+      totalRain += rain;
+      totalCumRain += cumRainfall;
+      totalExtraction += extraction;
+      totalTarget += Math.round(targetHourly);
+      avgMoisture += moisture;
+      avgFos += fos;
+      avgPorePressure += porePressure;
+      totalPumpDischarge += pumpDischarge;
+      totalSumpInflow += sumpInflow;
+      avgGrade += grade;
+    });
 
-    const porePressure = Math.round(15 + (moisture * 0.45) + (rain * 0.3));
-    const grade = parseFloat((42.5 + Math.sin(i) * 2.2).toFixed(1));
+    const count = minesToProcess.length;
 
     points.push({
       time: hour,
-      rainfall_mm_hr: rain,
-      cumulative_rainfall_mm: parseFloat(cumRainfall.toFixed(1)),
-      extraction_tonnes: extraction,
-      target_tonnes: Math.round(targetHourly),
-      soil_moisture_pct: moisture,
-      factor_of_safety: fos,
-      pore_pressure_kpa: porePressure,
-      pump_discharge_gpm: pumpDischarge,
-      sump_inflow_gpm: sumpInflow,
-      manganese_grade_pct: grade,
+      rainfall_mm_hr: parseFloat((totalRain / count).toFixed(1)), // Average regional rain
+      cumulative_rainfall_mm: parseFloat((totalCumRain / count).toFixed(1)),
+      extraction_tonnes: totalExtraction, // Sum of all extraction
+      target_tonnes: totalTarget, // Sum of all targets
+      soil_moisture_pct: parseFloat((avgMoisture / count).toFixed(1)),
+      factor_of_safety: parseFloat((avgFos / count).toFixed(2)),
+      pore_pressure_kpa: parseFloat((avgPorePressure / count).toFixed(1)),
+      pump_discharge_gpm: totalPumpDischarge,
+      sump_inflow_gpm: totalSumpInflow,
+      manganese_grade_pct: parseFloat((avgGrade / count).toFixed(1)),
     });
   }
 
