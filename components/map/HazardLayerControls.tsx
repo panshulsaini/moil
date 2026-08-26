@@ -10,6 +10,7 @@ export interface MapLayerState {
   showSlopeHazards: boolean;
   showFleetGps: boolean;
   showSensors: boolean;
+  showProspectivity: boolean;
 }
 
 export interface HazardLayerControlsProps {
@@ -77,6 +78,17 @@ export function HazardLayerControls({
             <Switch
               checked={layers.showSensors}
               onCheckedChange={() => toggleLayer("showSensors")}
+            />
+          </div>
+
+          <div className="flex items-center justify-between border-t border-slate-700/50 pt-2 mt-2">
+            <span className="flex items-center gap-2 text-emerald-400 font-medium">
+              <Layers className="h-3.5 w-3.5 text-emerald-400" />
+              AI Prospectivity (Reserves)
+            </span>
+            <Switch
+              checked={layers.showProspectivity}
+              onCheckedChange={() => toggleLayer("showProspectivity")}
             />
           </div>
         </div>

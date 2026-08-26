@@ -25,6 +25,7 @@ export function GisMiningMap() {
     showSlopeHazards: true,
     showFleetGps: true,
     showSensors: true,
+    showProspectivity: false,
   });
 
   return (

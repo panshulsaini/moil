@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 
 import { useGlobalStore } from "@/lib/store";
 import { MOIL_MINES } from "@/lib/mock-telemetry";
+import { HeatmapLayer } from "./HeatmapLayer";
 
 // ----------------------------------------------------------------------
 // Custom Leaflet DivIcons (since default png icons often break in Next.js)
@@ -99,9 +100,23 @@ function MapFocusController({ activeMineId }: { activeMineId: string | null }) {
   return null;
 }
 
-export default function RealLeafletMap({ layers }: { layers: { showRainRadar: boolean, showSlopeHazards: boolean, showFleetGps: boolean, showSensors: boolean } }) {
+export default function RealLeafletMap({ layers }: { layers: { showRainRadar: boolean, showSlopeHazards: boolean, showFleetGps: boolean, showSensors: boolean, showProspectivity: boolean } }) {
   const { activeMineId, isPlaying } = useGlobalStore();
   const [fleet, setFleet] = useState(initialFleet);
+  const [heatmapData, setHeatmapData] = useState<[number, number, number][]>([]);
+
+  // Fetch Prospectivity ML Data
+  useEffect(() => {
+    if (layers.showProspectivity) {
+      const mineQuery = activeMineId ? `?mine_id=${activeMineId}` : "";
+      fetch(`/api/prospectivity${mineQuery}`)
+        .then(res => res.json())
+        .then(data => setHeatmapData(data.data))
+        .catch(err => console.error("Failed to load prospectivity model", err));
+    } else {
+      setHeatmapData([]);
+    }
+  }, [layers.showProspectivity, activeMineId]);
 
   // Animate fleet positions
   useEffect(() => {
@@ -154,6 +169,11 @@ export default function RealLeafletMap({ layers }: { layers: { showRainRadar: bo
             </Popup>
           </Marker>
         ))}
+
+        {/* AI Prospectivity Heatmap (Kriging Output) */}
+        {layers.showProspectivity && heatmapData.length > 0 && (
+          <HeatmapLayer points={heatmapData} />
+        )}
 
         {/* Precipitation / Soil Moisture Radar Hazard Layers */}
         {layers.showRainRadar && (
