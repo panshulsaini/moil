@@ -94,7 +94,7 @@ export const store = {
   subscribe: (l: Listener) => { listeners.add(l); return () => listeners.delete(l); },
   setActiveMine: (id: string | null) => {
     activeMineId = id;
-    if (id) seriesData = generateTelemetrySeries(id, 24);
+    seriesData = generateTelemetrySeries(id as string, 24);
     emit();
   },
   setPlaying: (playing: boolean) => {
