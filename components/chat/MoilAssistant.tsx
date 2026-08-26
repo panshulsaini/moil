@@ -45,10 +45,21 @@ export function MoilAssistant() {
       const currentTelemetry = seriesData[seriesData.length - 1];
       const activeMine = MOIL_MINES.find(m => m.id === activeMineId);
       
+      // Map all mines to give the AI global knowledge
+      const allMinesStatus = MOIL_MINES.map(m => ({
+        name: m.name,
+        risk: m.risk_level,
+        shortfall_tonnage: m.shortfall_tonnage_est,
+        rain_mm_hr: m.current_rainfall_mm_hr,
+        moisture: m.current_soil_moisture_pct,
+        active_alerts: m.active_alerts,
+        fleet_uptime: m.fleet_uptime_pct
+      }));
+
       const context = {
-        active_mine_name: activeMine ? activeMine.name : "All MOIL Concessions (Regional)",
-        active_mine_district: activeMine ? activeMine.district : "Maharashtra & Madhya Pradesh",
-        telemetry: currentTelemetry,
+        currently_viewing_in_ui: activeMine ? activeMine.name : "All MOIL Concessions (Regional)",
+        active_mine_live_telemetry: currentTelemetry,
+        all_8_mines_current_status: allMinesStatus,
         fleet_status: "Total 64 units active across regional assets, 88% overall uptime"
       };
 
