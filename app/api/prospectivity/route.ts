@@ -1,38 +1,47 @@
 import { NextResponse } from "next/server";
 import { MOIL_MINES } from "@/lib/mock-telemetry";
 
-function generateSpatialKrigingPoints(centerLat: number, centerLng: number, radiusKm: number = 2.0, numPoints: number = 150) {
+function generateSpatialKrigingGrid(centerLat: number, centerLng: number, radiusKm: number = 3.5) {
   const points = [];
-  const numClusters = Math.floor(Math.random() * 3) + 3; // 3 to 5 clusters
+  const numClusters = 4; // 4 geological ore clusters
   const clusters = [];
   
   const degRadius = radiusKm / 111.0;
   
+  // Create solid clusters (ore bodies)
   for (let i = 0; i < numClusters; i++) {
     clusters.push({
-      lat: centerLat + (Math.random() * 2 - 1) * degRadius,
-      lng: centerLng + (Math.random() * 2 - 1) * degRadius,
-      intensity: 0.6 + Math.random() * 0.4,
-      spread: 0.002 + Math.random() * 0.004
+      lat: centerLat + (Math.random() * 2 - 1) * (degRadius * 0.7),
+      lng: centerLng + (Math.random() * 2 - 1) * (degRadius * 0.7),
+      intensity: 0.7 + Math.random() * 0.3, // 0.7 to 1.0
+      spread: 0.003 + Math.random() * 0.004 // Width of the blob
     });
   }
 
-  for (let i = 0; i < numPoints; i++) {
-    const pLat = centerLat + (Math.random() * 2 - 1) * degRadius;
-    const pLng = centerLng + (Math.random() * 2 - 1) * degRadius;
-    
-    let maxProb = 0.0;
-    for (const c of clusters) {
-      const dist = Math.sqrt(Math.pow(pLat - c.lat, 2) + Math.pow(pLng - c.lng, 2));
-      const prob = c.intensity * Math.exp(-Math.pow(dist, 2) / (2 * Math.pow(c.spread, 2)));
-      if (prob > maxProb) maxProb = prob;
-    }
-    
-    maxProb += 0.05 + Math.random() * 0.1;
-    maxProb = Math.min(1.0, maxProb);
-    
-    if (maxProb > 0.3) {
-      points.push([pLat, pLng, maxProb]);
+  // Create a structured grid instead of random scatter for smooth heatmap
+  const gridSize = 40; // 40x40 grid = 1600 points per mine
+  const step = (degRadius * 2) / gridSize;
+  
+  for (let x = 0; x < gridSize; x++) {
+    for (let y = 0; y < gridSize; y++) {
+      const pLat = centerLat - degRadius + (x * step);
+      const pLng = centerLng - degRadius + (y * step);
+      
+      let maxProb = 0.0;
+      for (const c of clusters) {
+        const dist = Math.sqrt(Math.pow(pLat - c.lat, 2) + Math.pow(pLng - c.lng, 2));
+        const prob = c.intensity * Math.exp(-Math.pow(dist, 2) / (2 * Math.pow(c.spread, 2)));
+        if (prob > maxProb) maxProb = prob;
+      }
+      
+      // Add slight organic noise (Geostatistics Nugget effect)
+      maxProb += (Math.random() * 0.15);
+      maxProb = Math.min(1.0, maxProb);
+      
+      // Only keep high-accuracy predictions
+      if (maxProb > 0.4) {
+        points.push([pLat, pLng, maxProb]);
+      }
     }
   }
   return points;
@@ -40,11 +49,26 @@ function generateSpatialKrigingPoints(centerLat: number, centerLng: number, radi
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const mineId = searchParams.get("mine_id") || "00000000-0000-0000-0000-000000000001";
+  const mineId = searchParams.get("mine_id");
   
-  const mine = MOIL_MINES.find(m => m.id === mineId) || MOIL_MINES[0];
+  let minesToProcess = [];
   
-  const heatmapData = generateSpatialKrigingPoints(mine.latitude, mine.longitude, 3.5, 400);
+  if (!mineId || mineId === "ALL") {
+    // Process ALL 8 MINES
+    minesToProcess = MOIL_MINES;
+  } else {
+    const mine = MOIL_MINES.find(m => m.id === mineId);
+    if (mine) {
+      minesToProcess = [mine];
+    }
+  }
+  
+  let heatmapData: [number, number, number][] = [];
+  
+  for (const mine of minesToProcess) {
+    const grid = generateSpatialKrigingGrid(mine.latitude, mine.longitude, 3.5);
+    heatmapData = heatmapData.concat(grid as [number, number, number][]);
+  }
   
   return NextResponse.json({
     status: "success",
