@@ -51,7 +51,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const mineId = searchParams.get("mine_id");
   
-  let minesToProcess = [];
+  let minesToProcess: typeof MOIL_MINES = [];
   
   if (!mineId || mineId === "ALL") {
     // Process ALL 8 MINES
