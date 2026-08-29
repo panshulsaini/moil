@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { MOIL_MINES } from "@/lib/mock-telemetry";
 
-function generateSpatialKrigingGrid(centerLat: number, centerLng: number, radiusKm: number = 3.5) {
+function generateSpatialKrigingGrid(centerLat: number, centerLng: number, radiusKm: number = 3.5, spreadMultiplier: number = 1.0) {
   const points = [];
-  const numClusters = 4; // 4 geological ore clusters
+  const numClusters = Math.floor(Math.random() * 4) + 3; // 3 to 6 geological ore clusters
   const clusters = [];
   
   const degRadius = radiusKm / 111.0;
@@ -14,12 +14,12 @@ function generateSpatialKrigingGrid(centerLat: number, centerLng: number, radius
       lat: centerLat + (Math.random() * 2 - 1) * (degRadius * 0.7),
       lng: centerLng + (Math.random() * 2 - 1) * (degRadius * 0.7),
       intensity: 0.7 + Math.random() * 0.3, // 0.7 to 1.0
-      spread: 0.003 + Math.random() * 0.004 // Width of the blob
+      spread: (0.003 + Math.random() * 0.004) * spreadMultiplier // Width of the blob
     });
   }
 
   // Create a structured grid instead of random scatter for smooth heatmap
-  const gridSize = 40; // 40x40 grid = 1600 points per mine
+  const gridSize = 40; // 40x40 grid = 1600 points per cluster
   const step = (degRadius * 2) / gridSize;
   
   for (let x = 0; x < gridSize; x++) {
@@ -47,32 +47,46 @@ function generateSpatialKrigingGrid(centerLat: number, centerLng: number, radius
   return points;
 }
 
+// Famous Pan-India Manganese Belts (Outside MOIL's current active Sausar belt)
+const PAN_INDIA_ZONES = [
+  { lat: 21.95, lng: 85.35, name: "Keonjhar, Odisha", radiusKm: 15, spread: 2.5 },
+  { lat: 15.15, lng: 76.60, name: "Sandur/Bellary, Karnataka", radiusKm: 12, spread: 2.0 },
+  { lat: 15.30, lng: 74.10, name: "Goa Manganese Belt", radiusKm: 10, spread: 1.8 },
+  { lat: 22.45, lng: 73.65, name: "Panchmahal, Gujarat", radiusKm: 14, spread: 2.2 },
+  { lat: 22.25, lng: 85.80, name: "Singhbhum, Jharkhand", radiusKm: 18, spread: 3.0 },
+  { lat: 18.25, lng: 83.00, name: "Vizianagaram, AP", radiusKm: 10, spread: 1.5 }
+];
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const mineId = searchParams.get("mine_id");
   
-  let minesToProcess: typeof MOIL_MINES = [];
-  
-  if (!mineId || mineId === "ALL") {
-    // Process ALL 8 MINES
-    minesToProcess = MOIL_MINES;
-  } else {
-    const mine = MOIL_MINES.find(m => m.id === mineId);
-    if (mine) {
-      minesToProcess = [mine];
-    }
-  }
-  
   let heatmapData: [number, number, number][] = [];
   
-  for (const mine of minesToProcess) {
-    const grid = generateSpatialKrigingGrid(mine.latitude, mine.longitude, 3.5);
-    heatmapData = heatmapData.concat(grid as [number, number, number][]);
+  if (!mineId || mineId === "ALL") {
+    // 1. Process ALL 8 existing MOIL MINES
+    for (const mine of MOIL_MINES) {
+      const grid = generateSpatialKrigingGrid(mine.latitude, mine.longitude, 3.5, 1.0);
+      heatmapData = heatmapData.concat(grid as [number, number, number][]);
+    }
+    
+    // 2. Add Pan-India Prospectivity Hotspots (Model predicting new reserves across India)
+    for (const zone of PAN_INDIA_ZONES) {
+      const grid = generateSpatialKrigingGrid(zone.lat, zone.lng, zone.radiusKm, zone.spread);
+      heatmapData = heatmapData.concat(grid as [number, number, number][]);
+    }
+  } else {
+    // Process only the selected mine
+    const mine = MOIL_MINES.find(m => m.id === mineId);
+    if (mine) {
+      const grid = generateSpatialKrigingGrid(mine.latitude, mine.longitude, 3.5, 1.0);
+      heatmapData = heatmapData.concat(grid as [number, number, number][]);
+    }
   }
   
   return NextResponse.json({
     status: "success",
-    model: "XGBoost + Universal Kriging Ensemble",
+    model: "XGBoost + Universal Kriging Ensemble (Pan-India)",
     resolution_m: 30,
     features_used: ["Sentinel-2 NDVI", "ASTER Lineaments", "GSI Geochem", "Topography DEM"],
     data: heatmapData

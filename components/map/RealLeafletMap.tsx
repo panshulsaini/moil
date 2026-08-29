@@ -95,6 +95,9 @@ function MapFocusController({ activeMineId }: { activeMineId: string | null }) {
       if (mine) {
         map.flyTo([mine.latitude, mine.longitude], 14, { duration: 1.5 });
       }
+    } else {
+      // Zoom out to see Pan-India Prospectivity Hotspots
+      map.flyTo([20.5937, 78.9629], 5, { duration: 1.5 });
     }
   }, [activeMineId, map]);
   return null;
