@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { MOIL_MINES } from "@/lib/mock-telemetry";
 
 function generateSpatialKrigingGrid(centerLat: number, centerLng: number, radiusKm: number = 3.5, spreadMultiplier: number = 1.0) {
@@ -62,7 +62,7 @@ const GLOBAL_ZONES = [
   { lat: -27.1, lng: 22.9, name: "Kalahari Manganese Field, South Africa", radiusKm: 80, spread: 12.0 }, // World's largest
   { lat: -13.9, lng: 136.4, name: "Groote Eylandt, Australia", radiusKm: 40, spread: 5.0 },
   { lat: -1.5, lng: 13.2, name: "Moanda, Gabon", radiusKm: 30, spread: 4.0 },
-  { lat: -6.0, lng: -50.2, name: "Caraj�s, Brazil", radiusKm: 35, spread: 4.5 },
+  { lat: -6.0, lng: -50.2, name: "Carajás, Brazil", radiusKm: 35, spread: 4.5 },
   { lat: 47.7, lng: 34.3, name: "Nikopol, Ukraine", radiusKm: 25, spread: 3.5 },
   { lat: 27.8, lng: 112.9, name: "Xiangtan, China", radiusKm: 20, spread: 3.0 },
   { lat: 5.3, lng: -1.9, name: "Nsuta, Ghana", radiusKm: 15, spread: 2.5 }
