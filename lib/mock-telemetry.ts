@@ -23,6 +23,25 @@ export interface MineTelemetryNode {
   last_ping: string;
 }
 
+export const PAN_INDIA_ZONES = [
+  { lat: 21.95, lng: 85.35, name: "Keonjhar, Odisha", radiusKm: 15, spread: 2.5 },
+  { lat: 15.15, lng: 76.60, name: "Sandur/Bellary, Karnataka", radiusKm: 12, spread: 2.0 },
+  { lat: 15.30, lng: 74.10, name: "Goa Manganese Belt", radiusKm: 10, spread: 1.8 },
+  { lat: 22.45, lng: 73.65, name: "Panchmahal, Gujarat", radiusKm: 14, spread: 2.2 },
+  { lat: 22.25, lng: 85.80, name: "Singhbhum, Jharkhand", radiusKm: 18, spread: 3.0 },
+  { lat: 18.25, lng: 83.00, name: "Vizianagaram, AP", radiusKm: 10, spread: 1.5 }
+];
+
+export const GLOBAL_ZONES = [
+  { lat: -27.1, lng: 22.9, name: "Kalahari Manganese Field, South Africa", radiusKm: 80, spread: 12.0 },
+  { lat: -13.9, lng: 136.4, name: "Groote Eylandt, Australia", radiusKm: 40, spread: 5.0 },
+  { lat: -1.5, lng: 13.2, name: "Moanda, Gabon", radiusKm: 30, spread: 4.0 },
+  { lat: -6.0, lng: -50.2, name: "Carajás, Brazil", radiusKm: 35, spread: 4.5 },
+  { lat: 47.7, lng: 34.3, name: "Nikopol, Ukraine", radiusKm: 25, spread: 3.5 },
+  { lat: 27.8, lng: 112.9, name: "Xiangtan, China", radiusKm: 20, spread: 3.0 },
+  { lat: 5.3, lng: -1.9, name: "Nsuta, Ghana", radiusKm: 15, spread: 2.5 }
+];
+
 export interface TelemetryTimeSeriesPoint {
   time: string;
   rainfall_mm_hr: number;

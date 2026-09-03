@@ -6,7 +6,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 import { useGlobalStore } from "@/lib/store";
-import { MOIL_MINES } from "@/lib/mock-telemetry";
+import { MOIL_MINES, PAN_INDIA_ZONES, GLOBAL_ZONES } from "@/lib/mock-telemetry";
 import { HeatmapLayer } from "./HeatmapLayer";
 
 // ----------------------------------------------------------------------
@@ -53,6 +53,20 @@ const mineIcon = L.divIcon({
   "></div>`,
   iconSize: [20, 20],
   iconAnchor: [10, 10],
+});
+
+const prospectIcon = L.divIcon({
+  className: "bg-transparent",
+  html: `<div style="
+    background-color: #F59E0B; 
+    width: 14px; 
+    height: 14px; 
+    border-radius: 50%; 
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px #F59E0B;
+  "></div>`,
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
 });
 
 // ----------------------------------------------------------------------
@@ -172,6 +186,28 @@ export default function RealLeafletMap({ layers }: { layers: { showRainRadar: bo
             </Popup>
           </Marker>
         ))}
+
+        {/* Global/Pan-India Prospectivity Markers */}
+        {(!activeMineId || activeMineId === "ALL") && layers.showProspectivity && (
+          <>
+            {PAN_INDIA_ZONES.map((zone, idx) => (
+              <Marker key={`pan-${idx}`} position={[zone.lat, zone.lng]} icon={prospectIcon}>
+                <Tooltip direction="top" offset={[0, -10]} opacity={1} className="bg-slate-900 text-amber-400 border-amber-500/50">
+                  <div className="font-bold text-xs">{zone.name}</div>
+                  <div className="text-[10px] text-slate-400">AI Prospectivity Zone</div>
+                </Tooltip>
+              </Marker>
+            ))}
+            {GLOBAL_ZONES.map((zone, idx) => (
+              <Marker key={`glob-${idx}`} position={[zone.lat, zone.lng]} icon={prospectIcon}>
+                <Tooltip direction="top" offset={[0, -10]} opacity={1} className="bg-slate-900 text-amber-400 border-amber-500/50">
+                  <div className="font-bold text-xs">{zone.name}</div>
+                  <div className="text-[10px] text-slate-400">Global AI Hotspot</div>
+                </Tooltip>
+              </Marker>
+            ))}
+          </>
+        )}
 
         {/* AI Prospectivity Heatmap (Kriging Output) */}
         {layers.showProspectivity && heatmapData.length > 0 && (
