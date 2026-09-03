@@ -90,7 +90,7 @@ const initialFleet = [
 function MapFocusController({ activeMineId }: { activeMineId: string | null }) {
   const map = useMap();
   useEffect(() => {
-    if (activeMineId) {
+    if (activeMineId && activeMineId !== "ALL") {
       const mine = MOIL_MINES.find((m) => m.id === activeMineId);
       if (mine) {
         map.flyTo([mine.latitude, mine.longitude], 14, { duration: 1.5 });
